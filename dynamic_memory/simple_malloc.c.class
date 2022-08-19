@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <unistd.h>
+
+#define HEAP_CHUNK_SIZE 4096
+
+void *heap_begin = NULL;
+void *heap_end = NULL;
+
+/* allocate size bytes from the heap */
+void *simple_malloc(size_t size)
+{
+    // all requests must be at least one byte
+    if (size < 1)
+    {
+        return NULL;
+    }
+
+    // add 8 bytes for bookkeeping
+    size += 8;
+
+    // 32-byte minimum chunk returned
+    if (size < 32) 
+    {
+        size = 32;
+    }
+
+    // round up to nearest 16-byte boundary
+    if (size%16 != 0)
+    {
+        size = ((size/16)+1)*16;
+    }
+
+    // get memory from sbrk() if we don't have any
+    if (heap_begin == NULL)
+    {
+        heap_begin = sbrk(HEAP_CHUNK_SIZE);
+        if (heap_begin == (void *)-1)
+        {
+            return NULL;
+        }
+        heap_end = heap_begin + HEAP_CHUNK_SIZE;
+        heap_begin += 8;
+    }
+
+    // make sure the heap is begin for the request
+    if (size > (heap_end-heap_begin))
+    {
+        int needed_bytes = size - (heap_end-heap_begin);
+        int total_new_bytes = ((needed_bytes/HEAP_CHUNK_SIZE)+1)*HEAP_CHUNK_SIZE;
+        if (sbrk(total_new_bytes) == (void *)-1)
+        {
+            return NULL;
+        }
+        heap_end = sbrk(0);
+    }
+
+    // save the first 8 bytes for the size, return 8 bytes after begin
+    void *returned_addr = heap_begin + 8;  
+
+    // write the size to the 8 bytes before the returned address
+    size_t *size_addr = (size_t *)heap_begin;
+    *size_addr  = size;
+
+    // set new beginning of heap past the allocated memory
+    heap_begin += size;
+    
+    return returned_addr;
+}
+
+/* return a previously allocated memory chunk to the allocator */
+void simple_free(void *ptr)
+{
+    return;
+}
