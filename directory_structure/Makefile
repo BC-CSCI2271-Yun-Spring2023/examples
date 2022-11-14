@@ -1,3 +1,5 @@
+all: ls1 ls2 ls3 ls4 du1 du2 du3 du4 du5
+
 ls1: ls1.o
 	gcc -Wall -g -o ls1 ls1.o
 

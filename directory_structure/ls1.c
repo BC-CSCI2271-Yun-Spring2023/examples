@@ -9,13 +9,15 @@ int main(int argc, char *argv[])
     for (int i=1; i<argc; ++i)
     {
         struct stat finfo;
+
         if (stat(argv[i], &finfo) == -1)
         {
-            perror(argv[i]);
-            continue;
+            printf("%s: file not found\n", argv[i]);
         }
-
-        printf("%s %li\n", argv[i], finfo.st_size);
+        else
+        {
+            printf("%s %li\n", argv[i], finfo.st_size);
+        }
     }
     return 0;
 }

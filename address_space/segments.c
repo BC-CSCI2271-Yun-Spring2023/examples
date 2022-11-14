@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 500 // needed for sbrk() on cslab
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

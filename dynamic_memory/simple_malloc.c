@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 500 // needed for sbrk() on cslab
+
 #include <unistd.h>
 
 #define HEAP_CHUNK_SIZE 4096

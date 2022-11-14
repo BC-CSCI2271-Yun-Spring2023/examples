@@ -39,6 +39,7 @@ int find_size(char *dir)
         if (stat(full_path, &finfo) != 0)
         {
             perror(full_path);
+            free(full_path);
             continue;
         }
 
@@ -46,7 +47,10 @@ int find_size(char *dir)
         {
             size += find_size(full_path);
         }
-        size += finfo.st_size;
+        else
+        {
+            size += finfo.st_size;
+        }
         free(full_path);
     }
     if (closedir(d) != 0)

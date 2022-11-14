@@ -3,14 +3,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <dirent.h>
 
 int find_size(char *dir)
 {
     int size = 0;
-
+    struct stat finfo;
     struct dirent *de;
+
     DIR *d = opendir(dir);
     if (d == NULL)
     {
@@ -18,7 +18,6 @@ int find_size(char *dir)
         exit(1);
     }
 
-    printf("Processing directory: %s\n", dir);
     for (de = readdir(d); de != NULL; de = readdir(d))
     {
         if (strcmp(de->d_name, "..") == 0)
@@ -26,32 +25,18 @@ int find_size(char *dir)
             continue;
         }
 
-        int new_length = strlen(dir) + 1 + strlen(de->d_name) + 1;
-        char *path = (char *)malloc(new_length * sizeof(char));
-        strcpy(path, dir);
-        strcat(path, "/");
-        strcat(path, de->d_name);
-
-        struct stat finfo;
-        if (stat(path, &finfo) == -1)
+        if (stat(de->d_name, &finfo) != 0)
         {
-            perror(path);
+            perror(de->d_name);
             continue;
         }
 
-        printf("Processing file: %s\n", path);
-        if (S_ISDIR(finfo.st_mode) && strcmp(de->d_name, ".") != 0)
+        if (S_ISDIR(finfo.st_mode) && (strcmp(de->d_name, ".") != 0))
         {
-            size += find_size(path);
+            size += find_size(de->d_name);
         }
-        else if (S_ISREG(finfo.st_mode))
-        {
-            size += finfo.st_size;
-        }
-
-        free(path);
+        size += finfo.st_size;
     }
-
     if (closedir(d) != 0)
     {
         perror("closedir");
@@ -62,7 +47,6 @@ int find_size(char *dir)
 
 int main()
 {
-    int total = find_size(".");
-    printf("%i\n", total);
+    printf("%d\n", find_size("."));
     return 0;
 }
