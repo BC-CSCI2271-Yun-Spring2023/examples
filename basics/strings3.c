@@ -7,8 +7,8 @@ int main()
 
     // replace the null character ending s with a comma
     s[11] = ',';
-
-    printf("%s\n", s);
+    
+    printf("%s\n",s);
 
     return 0;
 }
